@@ -24,12 +24,6 @@
 #include <fstream>
 #include <string>
 
-struct FeaturePoint{
-  cv::Point2f  point;
-  int id;
-  int age;
-};
-
 struct FeatureSet {
     std::vector<cv::Point2f>  points;
     std::vector<int>  ages;

@@ -32,7 +32,6 @@ int main(int argc, char **argv)
     // Load images and calibration parameters
     // -----------------------------------------
     bool display_ground_truth = false;
-    bool use_intel_rgbd = false;
     std::vector<Matrix> pose_matrix_gt;
     if(argc == 4)
     {   display_ground_truth = true;
@@ -44,15 +43,13 @@ int main(int argc, char **argv)
     }
     if(argc < 3)
     {
-        cerr << "Usage: ./run path_to_sequence(rgbd for using intel rgbd) path_to_calibration [optional]path_to_ground_truth_pose" << endl;
+        cerr << "Usage: ./run path_to_sequence path_to_calibration [optional]path_to_ground_truth_pose" << endl;
         return 1;
     }
 
     // Sequence
     string filepath = string(argv[1]);
     cout << "Filepath: " << filepath << endl;
-
-    if(filepath == "rgbd") use_intel_rgbd = true;
 
     // Camera calibration
     string strSettingPath = string(argv[2]);
@@ -68,25 +65,20 @@ int main(int argc, char **argv)
 
     cv::Mat projMatrl = (cv::Mat_<float>(3, 4) << fx, 0., cx, 0., 0., fy, cy, 0., 0,  0., 1., 0.);
     cv::Mat projMatrr = (cv::Mat_<float>(3, 4) << fx, 0., cx, bf, 0., fy, cy, 0., 0,  0., 1., 0.);
-    cout << "P_left: " << endl << projMatrl << endl;
-    cout << "P_right: " << endl << projMatrr << endl;
+    cout << "K_left: " << endl << projMatrl << endl;
+    cout << "K_right: " << endl << projMatrr << endl;
 
     // -----------------------------------------
     // Initialize variables
     // -----------------------------------------
     cv::Mat rotation = cv::Mat::eye(3, 3, CV_64F);
     cv::Mat translation = cv::Mat::zeros(3, 1, CV_64F);
-
-    cv::Mat pose = cv::Mat::zeros(3, 1, CV_64F);
-    cv::Mat Rpose = cv::Mat::eye(3, 3, CV_64F);
-    
     cv::Mat frame_pose = cv::Mat::eye(4, 4, CV_64F);
-    cv::Mat frame_pose32 = cv::Mat::eye(4, 4, CV_32F);
 
     std::cout << "frame_pose " << frame_pose << std::endl;
     cv::Mat trajectory = cv::Mat::zeros(600, 1200, CV_8UC3);
     FeatureSet currentVOFeatures;
-    cv::Mat points4D, points3D;
+
     int init_frame_id = 0;
 
     // ------------------------
@@ -95,7 +87,6 @@ int main(int argc, char **argv)
     cv::Mat imageRight_t0,  imageLeft_t0;
     cv::Mat imageLeft_t0_color;
     loadImageLeft(imageLeft_t0_color,  imageLeft_t0, init_frame_id, filepath);
-    
     cv::Mat imageRight_t0_color;  
     loadImageRight(imageRight_t0_color, imageRight_t0, init_frame_id, filepath);
     clock_t t_a, t_b;
@@ -103,8 +94,6 @@ int main(int argc, char **argv)
     // -----------------------------------------
     // Run visual odometry
     // -----------------------------------------
-    std::vector<FeaturePoint> oldFeaturePointsLeft;
-    std::vector<FeaturePoint> currentFeaturePointsLeft;
 
     for (int frame_id = init_frame_id+1; frame_id < 9000; frame_id++)
     {
@@ -118,13 +107,9 @@ int main(int argc, char **argv)
         cv::Mat imageLeft_t1_color;
         loadImageLeft(imageLeft_t1_color,  imageLeft_t1, frame_id, filepath);        
         cv::Mat imageRight_t1_color;  
-        loadImageRight(imageRight_t1_color, imageRight_t1, frame_id, filepath);            
-
+        loadImageRight(imageRight_t1_color, imageRight_t1, frame_id, filepath);   
 
         t_a = clock();
-        std::vector<cv::Point2f> oldPointsLeft_t0 = currentVOFeatures.points;
-
-
         std::vector<cv::Point2f> pointsLeft_t0, pointsRight_t0, pointsLeft_t1, pointsRight_t1;  
         matchingFeatures( imageLeft_t0, imageRight_t0,
                           imageLeft_t1, imageRight_t1, 
@@ -134,10 +119,9 @@ int main(int argc, char **argv)
                           pointsLeft_t1, 
                           pointsRight_t1);  
 
+        // set new images as old images
         imageLeft_t0 = imageLeft_t1;
         imageRight_t0 = imageRight_t1;
-
-        std::vector<cv::Point2f> newPoints;
 
         // ---------------------
         // Triangulate 3D Points
@@ -154,7 +138,6 @@ int main(int argc, char **argv)
         clock_t toc_gpu = clock();
         std::cerr << "tracking frame 2 frame: " << float(toc_gpu - tic_gpu)/CLOCKS_PER_SEC*1000 << "ms" << std::endl;
         displayTracking(imageLeft_t1, pointsLeft_t0, pointsLeft_t1);
-
 
         // ------------------------------------------------
         // Integrating and display

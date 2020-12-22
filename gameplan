@@ -1,7 +1,9 @@
 Done:
-run the code: ./run ../../data_odometry_gray/dataset/sequences/00/ ../calibration/kitti00.yaml 
+run the code: ./run ../../data_odometry_gray/dataset/sequences/00/ ../calibration/kitti00.yaml ../../dataset/poses/00.txt  
 read soft-slam paper
+get ground truth working
+go through and clean main.cpp
+clean up code and remove everything unnecessary
 
 To Do:
-clean up code and remove everything unnecessary
 add any updates like in the github changes

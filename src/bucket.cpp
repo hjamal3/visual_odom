@@ -21,7 +21,6 @@ void Bucket::add_feature(cv::Point2f point, int age){
         {
             features.points.push_back(point);
             features.ages.push_back(age);
-
         }
         else
         // insert feature with old age and remove youngest one

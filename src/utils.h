@@ -28,8 +28,6 @@ void drawFeaturePoints(cv::Mat image, std::vector<cv::Point2f>& points);
 
 void display(int frame_id, cv::Mat& trajectory, cv::Mat& pose, std::vector<Matrix>& pose_matrix_gt, float fps, bool showgt);
 
-
-
 // --------------------------------
 // Transformation
 // --------------------------------
@@ -47,8 +45,5 @@ cv::Vec3f rotationMatrixToEulerAngles(cv::Mat &R);
 void loadImageLeft(cv::Mat& image_color, cv::Mat& image_gary, int frame_id, std::string filepath);
 
 void loadImageRight(cv::Mat& image_color, cv::Mat& image_gary, int frame_id, std::string filepath);
-
-void loadGyro(std::string filename, std::vector<std::vector<double>>& time_gyros);
-// read time gyro txt file with format of timestamp, gx, gy, gz
 
 #endif
