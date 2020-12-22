@@ -1,0 +1,7 @@
+Done:
+run the code: ./run ../../data_odometry_gray/dataset/sequences/00/ ../calibration/kitti00.yaml 
+read soft-slam paper
+
+To Do:
+clean up code and remove everything unnecessary
+add any updates like in the github changes
