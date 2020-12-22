@@ -20,9 +20,6 @@
 #include "visualOdometry.h"
 #include "Frame.h"
 
-#include "camera_object.h"
-#include "rgbd_standalone.h"
-
 using namespace std;
 
 int main(int argc, char **argv)
@@ -63,7 +60,6 @@ int main(int argc, char **argv)
 
     cv::FileStorage fSettings(strSettingPath, cv::FileStorage::READ);
 
-    
     float fx = fSettings["Camera.fx"];
     float fy = fSettings["Camera.fy"];
     float cx = fSettings["Camera.cx"];
@@ -97,21 +93,11 @@ int main(int argc, char **argv)
     // Load first images
     // ------------------------
     cv::Mat imageRight_t0,  imageLeft_t0;
-    CameraBase *pCamera = NULL;
-    if(use_intel_rgbd)
-    {   
-        pCamera = new Intel_V4L2;
-        for (int throw_frames = 10 ; throw_frames >=0 ; throw_frames--)
-            pCamera->getLRFrames(imageLeft_t0,imageRight_t0);
-    }
-    else
-    {
-        cv::Mat imageLeft_t0_color;
-        loadImageLeft(imageLeft_t0_color,  imageLeft_t0, init_frame_id, filepath);
-        
-        cv::Mat imageRight_t0_color;  
-        loadImageRight(imageRight_t0_color, imageRight_t0, init_frame_id, filepath);
-    }
+    cv::Mat imageLeft_t0_color;
+    loadImageLeft(imageLeft_t0_color,  imageLeft_t0, init_frame_id, filepath);
+    
+    cv::Mat imageRight_t0_color;  
+    loadImageRight(imageRight_t0_color, imageRight_t0, init_frame_id, filepath);
     clock_t t_a, t_b;
 
     // -----------------------------------------
@@ -128,17 +114,11 @@ int main(int argc, char **argv)
         // Load images
         // ------------
         cv::Mat imageRight_t1,  imageLeft_t1;
-        if(use_intel_rgbd)
-        {
-            pCamera->getLRFrames(imageLeft_t1,imageRight_t1);
-        }
-        else
-        {
-            cv::Mat imageLeft_t1_color;
-            loadImageLeft(imageLeft_t1_color,  imageLeft_t1, frame_id, filepath);        
-            cv::Mat imageRight_t1_color;  
-            loadImageRight(imageRight_t1_color, imageRight_t1, frame_id, filepath);            
-        }
+
+        cv::Mat imageLeft_t1_color;
+        loadImageLeft(imageLeft_t1_color,  imageLeft_t1, frame_id, filepath);        
+        cv::Mat imageRight_t1_color;  
+        loadImageRight(imageRight_t1_color, imageRight_t1, frame_id, filepath);            
 
 
         t_a = clock();
@@ -157,11 +137,7 @@ int main(int argc, char **argv)
         imageLeft_t0 = imageLeft_t1;
         imageRight_t0 = imageRight_t1;
 
-        std::vector<cv::Point2f>& currentPointsLeft_t0 = pointsLeft_t0;
-        std::vector<cv::Point2f>& currentPointsLeft_t1 = pointsLeft_t1;
-        
         std::vector<cv::Point2f> newPoints;
-        std::vector<bool> valid; // valid new points are ture
 
         // ---------------------
         // Triangulate 3D Points
@@ -170,32 +146,21 @@ int main(int argc, char **argv)
         cv::triangulatePoints( projMatrl,  projMatrr,  pointsLeft_t0,  pointsRight_t0,  points4D_t0);
         cv::convertPointsFromHomogeneous(points4D_t0.t(), points3D_t0);
 
-/*        cv::Mat points3D_t1, points4D_t1;
-        cv::triangulatePoints( projMatrl,  projMatrr,  pointsLeft_t1,  pointsRight_t1,  points4D_t1);
-        cv::convertPointsFromHomogeneous(points4D_t1.t(), points3D_t1);*/
-
         // ---------------------
         // Tracking transfomation
         // ---------------------
-	clock_t tic_gpu = clock();
+        clock_t tic_gpu = clock();
         trackingFrame2Frame(projMatrl, projMatrr, pointsLeft_t0, pointsLeft_t1, points3D_t0, rotation, translation, false);
-	clock_t toc_gpu = clock();
-	std::cerr << "tracking frame 2 frame: " << float(toc_gpu - tic_gpu)/CLOCKS_PER_SEC*1000 << "ms" << std::endl;
+        clock_t toc_gpu = clock();
+        std::cerr << "tracking frame 2 frame: " << float(toc_gpu - tic_gpu)/CLOCKS_PER_SEC*1000 << "ms" << std::endl;
         displayTracking(imageLeft_t1, pointsLeft_t0, pointsLeft_t1);
 
 
-/*        points4D = points4D_t0;
-        frame_pose.convertTo(frame_pose32, CV_32F);
-        points4D = frame_pose32 * points4D;
-        cv::convertPointsFromHomogeneous(points4D.t(), points3D);*/
-
         // ------------------------------------------------
-        // Intergrating and display
+        // Integrating and display
         // ------------------------------------------------
 
         cv::Vec3f rotation_euler = rotationMatrixToEulerAngles(rotation);
-
-
         cv::Mat rigid_body_transformation;
 
         if(abs(rotation_euler[1])<0.1 && abs(rotation_euler[0])<0.1 && abs(rotation_euler[2])<0.1)
@@ -211,12 +176,6 @@ int main(int argc, char **argv)
         float fps = 1000/frame_time;
         cout << "[Info] frame times (ms): " << frame_time << endl;
         cout << "[Info] FPS: " << fps << endl;
-
-        // std::cout << "rigid_body_transformation" << rigid_body_transformation << std::endl;
-        // std::cout << "rotation: " << rotation_euler << std::endl;
-        // std::cout << "translation: " << translation.t() << std::endl;
-        // std::cout << "frame_pose" << frame_pose << std::endl;
-
 
         cv::Mat xyz = frame_pose.col(3).clone();
         display(frame_id, trajectory, xyz, pose_matrix_gt, fps, display_ground_truth);
