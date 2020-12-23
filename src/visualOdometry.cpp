@@ -4,41 +4,41 @@ using namespace cv;
 cv::Mat euler2rot(cv::Mat& rotationMatrix, const cv::Mat & euler)
 {
 
-  double x = euler.at<double>(0);
-  double y = euler.at<double>(1);
-  double z = euler.at<double>(2);
+    double x = euler.at<double>(0);
+    double y = euler.at<double>(1);
+    double z = euler.at<double>(2);
 
-  // Assuming the angles are in radians.
-  double ch = cos(z);
-  double sh = sin(z);
-  double ca = cos(y);
-  double sa = sin(y);
-  double cb = cos(x);
-  double sb = sin(x);
+    // Assuming the angles are in radians.
+    double ch = cos(z);
+    double sh = sin(z);
+    double ca = cos(y);
+    double sa = sin(y);
+    double cb = cos(x);
+    double sb = sin(x);
 
-  double m00, m01, m02, m10, m11, m12, m20, m21, m22;
+    double m00, m01, m02, m10, m11, m12, m20, m21, m22;
 
-  m00 = ch * ca;
-  m01 = sh*sb - ch*sa*cb;
-  m02 = ch*sa*sb + sh*cb;
-  m10 = sa;
-  m11 = ca*cb;
-  m12 = -ca*sb;
-  m20 = -sh*ca;
-  m21 = sh*sa*cb + ch*sb;
-  m22 = -sh*sa*sb + ch*cb;
+    m00 = ch * ca;
+    m01 = sh*sb - ch*sa*cb;
+    m02 = ch*sa*sb + sh*cb;
+    m10 = sa;
+    m11 = ca*cb;
+    m12 = -ca*sb;
+    m20 = -sh*ca;
+    m21 = sh*sa*cb + ch*sb;
+    m22 = -sh*sa*sb + ch*cb;
 
-  rotationMatrix.at<double>(0,0) = m00;
-  rotationMatrix.at<double>(0,1) = m01;
-  rotationMatrix.at<double>(0,2) = m02;
-  rotationMatrix.at<double>(1,0) = m10;
-  rotationMatrix.at<double>(1,1) = m11;
-  rotationMatrix.at<double>(1,2) = m12;
-  rotationMatrix.at<double>(2,0) = m20;
-  rotationMatrix.at<double>(2,1) = m21;
-  rotationMatrix.at<double>(2,2) = m22;
+    rotationMatrix.at<double>(0,0) = m00;
+    rotationMatrix.at<double>(0,1) = m01;
+    rotationMatrix.at<double>(0,2) = m02;
+    rotationMatrix.at<double>(1,0) = m10;
+    rotationMatrix.at<double>(1,1) = m11;
+    rotationMatrix.at<double>(1,2) = m12;
+    rotationMatrix.at<double>(2,0) = m20;
+    rotationMatrix.at<double>(2,1) = m21;
+    rotationMatrix.at<double>(2,2) = m22;
 
-  return rotationMatrix;
+    return rotationMatrix;
 }
 
 void checkValidMatch(std::vector<cv::Point2f>& points, std::vector<cv::Point2f>& points_return, std::vector<bool>& status, int threshold)
@@ -76,8 +76,6 @@ void removeInvalidPoints(std::vector<cv::Point2f>& points, const std::vector<boo
     }
 }
 
-
-
 void matchingFeatures(cv::Mat& imageLeft_t0, cv::Mat& imageRight_t0,
                       cv::Mat& imageLeft_t1, cv::Mat& imageRight_t1, 
                       FeatureSet& currentVOFeatures,
@@ -97,7 +95,7 @@ void matchingFeatures(cv::Mat& imageLeft_t0, cv::Mat& imageRight_t0,
 
         // append new features with old features
         appendNewFeatures(imageLeft_t0, currentVOFeatures);   
-        // std::cout << "Current feature set size: " << currentVOFeatures.points.size() << std::endl;
+        //std::cout << "Current feature set size: " << currentVOFeatures.points.size() << std::endl;
     }
 
     // --------------------------------------------------------
@@ -138,56 +136,53 @@ void trackingFrame2Frame(cv::Mat& projMatrl, cv::Mat& projMatrr,
                          bool mono_rotation)
 {
 
-      // Calculate frame to frame transformation
+    // Calculate frame to frame transformation
 
-      // -----------------------------------------------------------
-      // Rotation(R) estimation using Nister's Five Points Algorithm
-      // -----------------------------------------------------------
-      double focal = projMatrl.at<float>(0, 0);
-      cv::Point2d principle_point(projMatrl.at<float>(0, 2), projMatrl.at<float>(1, 2));
+    // -----------------------------------------------------------
+    // Rotation(R) estimation using Nister's Five Points Algorithm
+    // -----------------------------------------------------------
+    double focal = projMatrl.at<float>(0, 0);
+    cv::Point2d principle_point(projMatrl.at<float>(0, 2), projMatrl.at<float>(1, 2));
 
-      //recovering the pose and the essential cv::matrix
-      cv::Mat E, mask;
-      cv::Mat translation_mono = cv::Mat::zeros(3, 1, CV_64F);
-      if(mono_rotation)
-      {
-      	E = cv::findEssentialMat(pointsLeft_t0, pointsLeft_t1, focal, principle_point, cv::RANSAC, 0.999, 1.0, mask);
-      	cv::recoverPose(E, pointsLeft_t0, pointsLeft_t1, rotation, translation_mono, focal, principle_point, mask);
-      	// std::cout << "recoverPose rotation: " << rotation << std::endl;
-      }
-      // ------------------------------------------------
-      // Translation (t) estimation by use solvePnPRansac
-      // ------------------------------------------------
-      cv::Mat distCoeffs = cv::Mat::zeros(4, 1, CV_64FC1);   
-      cv::Mat rvec = cv::Mat::zeros(3, 1, CV_64FC1);
-      cv::Mat intrinsic_matrix = (cv::Mat_<float>(3, 3) << projMatrl.at<float>(0, 0), projMatrl.at<float>(0, 1), projMatrl.at<float>(0, 2),
-                                                   projMatrl.at<float>(1, 0), projMatrl.at<float>(1, 1), projMatrl.at<float>(1, 2),
-                                                   projMatrl.at<float>(1, 1), projMatrl.at<float>(1, 2), projMatrl.at<float>(1, 3));
+    //recovering the pose and the essential cv::matrix
+    // cv::Mat E, mask;
+    // cv::Mat translation_mono = cv::Mat::zeros(3, 1, CV_64F);
+    // if(mono_rotation)
+    // {
+    //     E = cv::findEssentialMat(pointsLeft_t0, pointsLeft_t1, focal, principle_point, cv::RANSAC, 0.999, 1.0, mask);
+    //     cv::recoverPose(E, pointsLeft_t0, pointsLeft_t1, rotation, translation_mono, focal, principle_point, mask);
+    //     // std::cout << "recoverPose rotation: " << rotation << std::endl;
+    // }
+    // ------------------------------------------------
+    // Translation (t) estimation by use solvePnPRansac
+    // ------------------------------------------------
+    cv::Mat distCoeffs = cv::Mat::zeros(4, 1, CV_64FC1);   
+    cv::Mat rvec = cv::Mat::zeros(3, 1, CV_64FC1);
+    cv::Mat intrinsic_matrix = (cv::Mat_<float>(3, 3) << projMatrl.at<float>(0, 0), projMatrl.at<float>(0, 1), projMatrl.at<float>(0, 2),
+                                                projMatrl.at<float>(1, 0), projMatrl.at<float>(1, 1), projMatrl.at<float>(1, 2),
+                                                projMatrl.at<float>(1, 1), projMatrl.at<float>(1, 2), projMatrl.at<float>(1, 3));
 
-      int iterationsCount = 500;        // number of Ransac iterations.
-      float reprojectionError = .5;    // maximum allowed distance to consider it an inlier.
-      float confidence = 0.999;          // RANSAC successful confidence.
-      bool useExtrinsicGuess = true;
-      int flags =cv::SOLVEPNP_ITERATIVE;
+    int iterationsCount = 500;        // number of Ransac iterations.
+    float reprojectionError = .5;    // maximum allowed distance to consider it an inlier.
+    float confidence = 0.999;          // RANSAC successful confidence.
+    bool useExtrinsicGuess = true;
+    int flags =cv::SOLVEPNP_ITERATIVE;
 
-      #if 1
-      cv::Mat inliers; 
-      cv::solvePnPRansac( points3D_t0, pointsLeft_t1, intrinsic_matrix, distCoeffs, rvec, translation,
-                          useExtrinsicGuess, iterationsCount, reprojectionError, confidence,
-                          inliers, flags );
-      #endif
-      #if 0
-      std::vector<int> inliers;
-      cv::cuda::solvePnPRansac(points3D_t0.t(), cv::Mat(1, (int)pointsLeft_t1.size(), CV_32FC2, &pointsLeft_t1[0]),
-                            intrinsic_matrix, cv::Mat(1, 8, CV_32F, cv::Scalar::all(0)),
-                            rvec, translation, false, 200, 0.5, 20, &inliers);
-      #endif
-      if (!mono_rotation)
-      {
-        cv::Rodrigues(rvec, rotation);
-      }
+    #if 1
+    cv::Mat inliers; 
+    cv::solvePnPRansac( points3D_t0, pointsLeft_t1, intrinsic_matrix, distCoeffs, rvec, translation,
+                        useExtrinsicGuess, iterationsCount, reprojectionError, confidence,
+                        inliers, flags );
+    #endif
+    #if 0
+    std::vector<int> inliers;
+    cv::cuda::solvePnPRansac(points3D_t0.t(), cv::Mat(1, (int)pointsLeft_t1.size(), CV_32FC2, &pointsLeft_t1[0]),
+                        intrinsic_matrix, cv::Mat(1, 8, CV_32F, cv::Scalar::all(0)),
+                        rvec, translation, false, 200, 0.5, 20, &inliers);
+    #endif
+    cv::Rodrigues(rvec, rotation);
 
-      std::cout << "[trackingFrame2Frame] inliers size: " << inliers.size() << std::endl;
+    std::cout << "[trackingFrame2Frame] inliers size: " << inliers.size() << std::endl;
 
 }
 

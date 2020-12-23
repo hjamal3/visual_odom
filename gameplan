@@ -4,6 +4,37 @@ read soft-slam paper
 get ground truth working
 go through and clean main.cpp
 clean up code and remove everything unnecessary
+move over to vscode
+bucket.h:
+- defines bucket
+- bucket has ID, max size, FeatureSet, and functions to add and get features
+feature.h
+- defines FeatureSet
+- FeatureSet has vector of 2D points, vector of ages.
+- deleteUnmatchFeatures, featureDetectionFast, featureDetectionGoodFeaturesToTrack, featureTracking, deleteUnmatchFeaturesCircle
+circularMatching, bucketingFeatures, appendNewFeatures
+frame.h/cpp
+- dont use
+utils.h
+- drawFeaturePoint, display, integrateOdometryStereo, isRotationMatrix, rotationMatrixToEulerAngles, loadImageLeft, loadImageRight
+visualOdometry.h
+- matchingFeatures, trackingFrame2Frame, displayTracking
+bucket.cpp
+- do you ever add a feature past the age threshold? in theory it should be possible, cause adding and readding to buckets
+feature.cpp
+utils.cpp
+- integrateOdometryStereo updates frame_pose with rotation and translation
+visualOdometry.cpp
+- checkValidMath: if points are within certain range of each other
+- removeInvalidPoints: vector + status = vector
+- matchingFeatures: adds new features, no guarantees if the features are not the same as the previous ones if less than 2000 features
+- matchingFeatures: 
+- about 20% of features filtered from circular matching !
+- literally only doing PnP
+main.cpp
+read through the code files and figure out what's going on. remove anything unused
 
 To Do:
-add any updates like in the github changes
+convert to ROS
+serious amount of CPU is being used btw.
+try some analyzer software

@@ -39,7 +39,7 @@ void Bucket::add_feature(cv::Point2f point, int age){
             features.points[age_min_idx] = point;
             features.ages[age_min_idx] = age;
         }
-    }
+    } 
 
 }
 

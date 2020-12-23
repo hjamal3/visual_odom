@@ -18,7 +18,6 @@
 #include "utils.h"
 #include "evaluate_odometry.h"
 #include "visualOdometry.h"
-#include "Frame.h"
 
 using namespace std;
 

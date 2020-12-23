@@ -40,8 +40,6 @@ void display(int frame_id, cv::Mat& trajectory, cv::Mat& pose, std::vector<Matri
     // putText(traj, text, textOrg, fontFace, fontScale, Scalar::all(255), thickness, 8);
 
     cv::imshow( "Trajectory", trajectory );
-
-
     cv::waitKey(1);
 }
 

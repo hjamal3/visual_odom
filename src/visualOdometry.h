@@ -20,8 +20,6 @@
 #include "feature.h"
 #include "bucket.h"
 #include "utils.h"
-#include "Frame.h"
-
 
 
 void matchingFeatures(cv::Mat& imageLeft_t0, cv::Mat& imageRight_t0,

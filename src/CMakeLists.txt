@@ -17,8 +17,6 @@ add_library(feature SHARED "feature.cpp")
 add_library(bucket SHARED "bucket.cpp")
 add_library(Utils SHARED "utils.cpp")
 add_library(visualOdometry SHARED "visualOdometry.cpp")
-add_library(Frame SHARED "Frame.cpp")
-
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
 message(${PROJECT_SOURCE_DIR})
@@ -29,6 +27,4 @@ target_link_libraries( feature ${OpenCV_LIBS} bucket)
 target_link_libraries( Utils evaluate_odometry feature ${OpenCV_LIBS} )
 target_link_libraries( visualOdometry Utils bucket feature ${OpenCV_LIBS})
 
-
-target_link_libraries( Frame ${OpenCV_LIBS} )
-target_link_libraries( run ${OpenCV_LIBS} Utils bucket feature visualOdometry Frame)
+target_link_libraries( run ${OpenCV_LIBS} Utils bucket feature visualOdometry)
